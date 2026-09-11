@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Royal Party Crown & Chits inside 66dp safe zone (x: 21 to 87, y: 21 to 87) -->
+    
+    <!-- Crown Base / Royal Diadem -->
+    <path
+        android:fillColor="#FFFFB300"
+        android:pathData="M30,62 L35,42 L46,51 L54,34 L62,51 L73,42 L78,62 Z" />
+    
+    <!-- Crown Base Band -->
+    <path
+        android:fillColor="#FFFFD54F"
+        android:pathData="M28,62 L80,62 L78,69 L30,69 Z" />
+
+    <!-- Crown Jewels -->
+    <path
+        android:fillColor="#FFFF1744"
+        android:pathData="M54,34m-3.5,0a3.5,3.5 0,1,1 7,0a3.5,3.5 0,1,1 -7,0" />
+    <path
+        android:fillColor="#FF00E676"
+        android:pathData="M35,42m-2.8,0a2.8,2.8 0,1,1 5.6,0a2.8,2.8 0,1,1 -5.6,0" />
+    <path
+        android:fillColor="#FF00E676"
+        android:pathData="M73,42m-2.8,0a2.8,2.8 0,1,1 5.6,0a2.8,2.8 0,1,1 -5.6,0" />
+
+    <!-- Chit / Card Folded Left (Chor / Sipahi Chit) -->
+    <path
+        android:fillColor="#FFF8F9FA"
+        android:pathData="M34,70 L48,70 L45,82 L31,82 Z" />
+    <path
+        android:fillColor="#FFE0E0E0"
+        android:pathData="M36,73 L46,73 L45,76 L35,76 Z" />
+
+    <!-- Chit / Card Center Right -->
+    <path
+        android:fillColor="#FFFFE082"
+        android:pathData="M52,70 L66,70 L69,82 L55,82 Z" />
+    <path
+        android:fillColor="#FFFFB74D"
+        android:pathData="M55,73 L63,73 L64,76 L56,76 Z" />
+
+    <!-- Sparkle Stars -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M54,23 L55.5,28 L60,29.5 L55.5,31 L54,36 L52.5,31 L48,29.5 L52.5,28 Z" />
+    <path
+        android:fillColor="#FFFFD54F"
+        android:pathData="M26,35 L27,38 L30,39 L27,40 L26,43 L25,40 L22,39 L25,38 Z" />
+    <path
+        android:fillColor="#FFFFD54F"
+        android:pathData="M82,35 L83,38 L86,39 L83,40 L82,43 L81,40 L78,39 L81,38 Z" />
+
+</vector>

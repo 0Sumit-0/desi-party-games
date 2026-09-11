@@ -1,0 +1,16 @@
+# IDE & Local configurations
+.idea/
+*.iml
+local.properties
+.DS_Store
+.env
+debug.keystore
+
+# Build folders & generated files
+build/
+app/build/
+.gradle/
+.kotlin/
+.cxx/
+/captures
+.externalNativeBuild
