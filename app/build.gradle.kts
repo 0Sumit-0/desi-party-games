@@ -9,18 +9,40 @@ android {
   namespace = "com.desipartygames"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
+  // --- 1. SIGNING CONFIG LOGIC (Pipeline ke liye zaroori) ---
+  signingConfigs {
+    create("release") {
+      storeFile = file("keystore.jks")
+      storePassword = System.getenv("KEYSTORE_PASSWORD")
+      keyAlias = System.getenv("KEY_ALIAS")
+      keyPassword = System.getenv("KEY_PASSWORD")
+    }
+  }
+
+
   defaultConfig {
     applicationId = "com.ted.desipartygames"
     minSdk = 24
     targetSdk = 36
-    versionCode = 2
-    versionName = "1.0"
+    //versionCode = 2
+    //versionName = "1.0"
+
+    // --- 2. AUTO INCREMENT LOGIC (With Offset) ---
+    // GITHUB_RUN_NUMBER string format mein aata hai, usko int mein convert kiya
+    val runNumber = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
+
+    // Aapka purana versionCode 2 tha, toh (2 + 1 = 3) se start hoga
+    versionCode = 2 + runNumber
+    versionName = "1.0.$versionCode"
+    // ----------------------------
+
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
   buildTypes {
     release {
+      signingConfig = signingConfigs.getByName("release") // Yahan signing config connect kiya
       isCrunchPngs = false
       isMinifyEnabled = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
