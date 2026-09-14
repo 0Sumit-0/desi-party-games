@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.desipartygames.core.AppLanguage
 import com.desipartygames.core.AppStrings
+import androidx.compose.ui.window.Dialog
 import com.desipartygames.core.SoundEffects
 import com.desipartygames.data.content.CharadesBank
 import com.desipartygames.ui.components.*
@@ -40,6 +42,8 @@ fun CharadesScreen(
     val context = LocalContext.current
     val currentTeam = uiState.teams.getOrNull(uiState.currentTeamIndex)
     var showTutorialDialog by rememberSaveable { mutableStateOf(false) }
+    var showSettingsDialog by rememberSaveable { mutableStateOf(false) }
+    var showPromptDetails by rememberSaveable(uiState.currentPrompt?.title) { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -56,25 +60,17 @@ fun CharadesScreen(
         },
         containerColor = SleekBg
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             when (uiState.gameState) {
-                CharadesGameState.SETUP -> {
-                    CharadesSetupView(
-                        uiState = uiState,
-                        language = language,
-                        onSelectCategory = { viewModel.selectCategory(it) },
-                        onStartTurn = {
-                            SoundEffects.playClick(context)
-                            viewModel.startTurn()
-                        },
-                        onToggleCheatSheet = { viewModel.toggleCheatSheet() }
-                    )
-                }
-
+                CharadesGameState.SETUP -> CharadesSetupView(
+                    uiState = uiState,
+                    onSettingsClick = { showSettingsDialog = true },
+                    onRenameTeam = { index, name -> viewModel.renameTeam(index, name) },
+                    onStartTurn = {
+                        SoundEffects.playClick(context)
+                        viewModel.startTurn()
+                    }
+                )
                 CharadesGameState.PASS_TO_ACTOR -> {
                     val prompt = uiState.currentPrompt
                     PassPhoneDialog(
@@ -87,30 +83,25 @@ fun CharadesScreen(
                         onDonePassing = { viewModel.startActing() }
                     )
                 }
-
-                CharadesGameState.PERFORMING, CharadesGameState.RESULT -> {
-                    CharadesPerformingView(
-                        uiState = uiState,
-                        language = language,
-                        onGuessedCorrect = {
-                            SoundEffects.playSuccess(context)
-                            viewModel.recordTurnResult(true)
-                        },
-                        onPassOrTimeout = {
-                            SoundEffects.playBuzzer(context)
-                            viewModel.recordTurnResult(false)
-                        },
-                        onToggleCheatSheet = { viewModel.toggleCheatSheet() }
-                    )
-                }
+                CharadesGameState.PERFORMING, CharadesGameState.RESULT -> CharadesPerformingView(
+                    uiState = uiState,
+                    showPromptDetails = showPromptDetails,
+                    onTogglePromptDetails = { showPromptDetails = !showPromptDetails },
+                    onGuessedCorrect = {
+                        SoundEffects.playSuccess(context)
+                        viewModel.recordTurnResult(true)
+                    },
+                    onPassOrTimeout = {
+                        SoundEffects.playBuzzer(context)
+                        viewModel.recordTurnResult(false)
+                    },
+                    onToggleCheatSheet = { viewModel.toggleCheatSheet() }
+                )
             }
 
-            // Gesture Cheat Sheet Modal
             if (uiState.isCheatSheetOpen) {
                 CharadesCheatSheetDialog(onDismiss = { viewModel.toggleCheatSheet() })
             }
-
-            // In-App Tutorial Dialog
             if (showTutorialDialog) {
                 GameTutorialDialog(
                     initialGameId = "game_charades",
@@ -118,14 +109,19 @@ fun CharadesScreen(
                     onDismiss = { showTutorialDialog = false }
                 )
             }
-
-            // Scoreboard Modal
             if (uiState.isScoreboardOpen) {
                 ScoreBoardDialog(
                     scores = uiState.teams.map { PlayerScore(it.name, it.score, it.emoji) },
                     title = "Charades Battle Board",
                     language = language,
                     onDismiss = { viewModel.setScoreboardOpen(false) }
+                )
+            }
+            if (showSettingsDialog) {
+                CharadesSettingsDialog(
+                    selectedCategory = uiState.selectedCategory,
+                    onSelectCategory = { viewModel.selectCategory(it) },
+                    onDismiss = { showSettingsDialog = false }
                 )
             }
         }
@@ -135,12 +131,10 @@ fun CharadesScreen(
 @Composable
 fun CharadesSetupView(
     uiState: CharadesUiState,
-    language: AppLanguage,
-    onSelectCategory: (com.desipartygames.data.content.CharadesCategory) -> Unit,
     onStartTurn: () -> Unit,
-    onToggleCheatSheet: () -> Unit
+    onSettingsClick: () -> Unit,
+    onRenameTeam: (Int, String) -> Unit
 ) {
-    val context = LocalContext.current
     val currentTeam = uiState.teams.getOrNull(uiState.currentTeamIndex)
 
     LazyColumn(
@@ -185,65 +179,22 @@ fun CharadesSetupView(
                         )
                     }
 
-                    IconButton(onClick = onToggleCheatSheet) {
-                        Icon(Icons.Default.SignLanguage, contentDescription = "Gestures", tint = SleekPurple)
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(Icons.Default.Settings, contentDescription = "Game settings", tint = SleekPurple)
                     }
                 }
             }
         }
 
-        item {
-            Text(
-                text = "Select Charades Category:",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = SleekPurple
+        itemsIndexed(uiState.teams) { index, team ->
+            OutlinedTextField(
+                value = team.name,
+                onValueChange = { onRenameTeam(index, it) },
+                label = { Text("Team ${index + 1} name") },
+                leadingIcon = { Text(team.emoji, fontSize = 20.sp) },
+                modifier = Modifier.fillMaxWidth().testTag("team_name_$index"),
+                singleLine = true
             )
-        }
-
-        items(CharadesBank.categories) { cat ->
-            val isSelected = cat.id == uiState.selectedCategory.id
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .clickable {
-                        SoundEffects.playClick(context)
-                        onSelectCategory(cat)
-                    }
-                    .border(
-                        if (isSelected) 2.dp else 1.dp,
-                        if (isSelected) SleekPurple else SleekSurfaceBorder,
-                        RoundedCornerShape(16.dp)
-                    ),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (isSelected) SleekPurpleContainer else SleekSurfaceCard
-                )
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    Text(text = cat.icon, fontSize = 28.sp)
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = cat.title,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isSelected) SleekOnPurpleContainer else SleekTextPrimary
-                        )
-                        Text(
-                            text = "${cat.items.size} authentic titles & prompts",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (isSelected) SleekOnPurpleContainer.copy(alpha = 0.8f) else SleekTextSecondary
-                        )
-                    }
-                    if (isSelected) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = "Selected", tint = SleekPurple)
-                    }
-                }
-            }
         }
 
         item {
@@ -275,7 +226,8 @@ fun CharadesSetupView(
 @Composable
 fun CharadesPerformingView(
     uiState: CharadesUiState,
-    language: AppLanguage,
+    showPromptDetails: Boolean,
+    onTogglePromptDetails: () -> Unit,
     onGuessedCorrect: () -> Unit,
     onPassOrTimeout: () -> Unit,
     onToggleCheatSheet: () -> Unit
@@ -315,27 +267,25 @@ fun CharadesPerformingView(
                 textAlign = TextAlign.Center
             )
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = SleekSurfaceElevated),
-                border = androidx.compose.foundation.BorderStroke(1.dp, SleekSurfaceBorder),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(14.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+            IconButton(onClick = onTogglePromptDetails) {
+                Icon(
+                    imageVector = if (showPromptDetails) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                    contentDescription = if (showPromptDetails) "Hide prompt details" else "Show prompt details",
+                    tint = SleekPurple
+                )
+            }
+            if (showPromptDetails) {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = SleekSurfaceElevated,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, SleekSurfaceBorder)
                 ) {
                     Text(
-                        text = "Category: ${prompt?.category ?: ""}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = SleekPurple,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Word Count: ${prompt?.hints ?: "1-3 words"}",
+                        text = "${prompt?.category ?: ""} • ${prompt?.hints ?: "1-3 words"}",
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                         style = MaterialTheme.typography.bodySmall,
-                        color = SleekTextSecondary
+                        color = SleekTextSecondary,
+                        textAlign = TextAlign.Center
                     )
                 }
             }
@@ -382,6 +332,86 @@ fun CharadesPerformingView(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text("Guessed It! (+10)", fontWeight = FontWeight.Bold, color = Color.White)
+            }
+        }
+    }
+}
+
+@Composable
+private fun CharadesSettingsDialog(
+    selectedCategory: com.desipartygames.data.content.CharadesCategory,
+    onSelectCategory: (com.desipartygames.data.content.CharadesCategory) -> Unit,
+    onDismiss: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = SleekSurfaceCard)
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Game Settings",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = SleekTextPrimary
+                    )
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Default.Close, contentDescription = "Close settings")
+                    }
+                }
+                Text("Choose category", fontWeight = FontWeight.Bold, color = SleekPurple)
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 360.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(CharadesBank.categories) { category ->
+                        val isSelected = category.id == selectedCategory.id
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onSelectCategory(category) },
+                            shape = RoundedCornerShape(14.dp),
+                            color = if (isSelected) SleekPurpleContainer else SleekSurfaceElevated,
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.dp,
+                                if (isSelected) SleekPurple else SleekSurfaceBorder
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Text(category.icon, fontSize = 24.sp)
+                                Text(
+                                    text = category.title,
+                                    modifier = Modifier.weight(1f),
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isSelected) SleekOnPurpleContainer else SleekTextPrimary
+                                )
+                                if (isSelected) {
+                                    Icon(Icons.Default.CheckCircle, contentDescription = "Selected", tint = SleekPurple)
+                                }
+                            }
+                        }
+                    }
+                }
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text("Done")
+                }
             }
         }
     }

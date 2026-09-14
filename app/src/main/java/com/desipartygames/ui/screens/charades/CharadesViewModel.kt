@@ -24,7 +24,7 @@ data class CharadesTeam(
 
 data class CharadesUiState(
     val gameState: CharadesGameState = CharadesGameState.SETUP,
-    val selectedCategory: CharadesCategory = CharadesBank.categories.first(),
+    val selectedCategory: CharadesCategory = CharadesBank.allCategories,
     val teams: List<CharadesTeam> = listOf(
         CharadesTeam("Team Sholay", 0, "🔥"),
         CharadesTeam("Team Lagaan", 0, "🏏")
@@ -49,6 +49,13 @@ class CharadesViewModel(private val repository: PartyGamesRepository) : ViewMode
 
     fun setTimerSeconds(seconds: Int) {
         _uiState.value = _uiState.value.copy(timerSeconds = seconds)
+    }
+
+    fun renameTeam(index: Int, name: String) {
+        if (name.isBlank() || index !in _uiState.value.teams.indices) return
+        val updatedTeams = _uiState.value.teams.toMutableList()
+        updatedTeams[index] = updatedTeams[index].copy(name = name.trim())
+        _uiState.value = _uiState.value.copy(teams = updatedTeams)
     }
 
     fun startTurn() {

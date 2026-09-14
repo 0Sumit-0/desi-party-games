@@ -16,7 +16,7 @@ data class CharadesCategory(
 )
 
 object CharadesBank {
-    val categories: List<CharadesCategory> = listOf(
+    private val playableCategories: List<CharadesCategory> = listOf(
         CharadesCategory(
             id = "movies_easy",
             title = "Iconic Bollywood Movies",
@@ -32,7 +32,26 @@ object CharadesBank {
                 CharadesItem("Dangal", "Iconic Bollywood", "Mahavir Phogat wrestling training", "Easy"),
                 CharadesItem("Bahubali", "Iconic Bollywood", "Lifting Shivling & Katappa mystery", "Easy"),
                 CharadesItem("Pushpa", "Iconic Bollywood", "Main Jhukega Nahi signature beard gesture", "Easy"),
-                CharadesItem("Chennai Express", "Iconic Bollywood", "Meenamma & lungi dance journey", "Easy")
+                CharadesItem("Chennai Express", "Iconic Bollywood", "Meenamma & lungi dance journey", "Easy"),
+                CharadesItem("Zindagi Na Milegi Dobara", "Iconic Bollywood", "Three friends and a road trip", "Easy"),
+                CharadesItem("Yeh Jawaani Hai Deewani", "Iconic Bollywood", "Bunny and Naina travel romance", "Easy"),
+                CharadesItem("Kabhi Khushi Kabhie Gham", "Iconic Bollywood", "Family reunion and emotional goodbye", "Easy"),
+                CharadesItem("Queen", "Iconic Bollywood", "Solo honeymoon after wedding cancellation", "Easy"),
+                CharadesItem("Barfi!", "Iconic Bollywood", "Silent mischievous romantic hero", "Medium"),
+                CharadesItem("Munna Bhai M.B.B.S.", "Iconic Bollywood", "Doctor with a warm hug", "Easy"),
+                CharadesItem("Om Shanti Om", "Iconic Bollywood", "Film set reincarnation mystery", "Medium"),
+                CharadesItem("Gully Boy", "Iconic Bollywood", "Rapping from the Mumbai streets", "Easy"),
+                CharadesItem("Rockstar", "Iconic Bollywood", "Guitar and intense stage performance", "Easy"),
+                CharadesItem("Bajrangi Bhaijaan", "Iconic Bollywood", "Taking a lost child home", "Easy"),
+                CharadesItem("Taare Zameen Par", "Iconic Bollywood", "Teacher helps a creative child", "Medium"),
+                CharadesItem("Swades", "Iconic Bollywood", "Engineer returns to village", "Medium"),
+                CharadesItem("Bhaag Milkha Bhaag", "Iconic Bollywood", "Athlete running through hardship", "Easy"),
+                CharadesItem("Stree", "Iconic Bollywood", "Mysterious woman and empty street", "Medium"),
+                CharadesItem("Bhool Bhulaiyaa", "Iconic Bollywood", "Haunted palace and dance trance", "Easy"),
+                CharadesItem("Drishyam", "Iconic Bollywood", "Family hides evidence with movie plan", "Medium"),
+                CharadesItem("Kahaani", "Iconic Bollywood", "Pregnant woman searches Kolkata", "Medium"),
+                CharadesItem("Dil Chahta Hai", "Iconic Bollywood", "Three friends and a beach trip", "Easy"),
+                CharadesItem("Hera Pheri", "Iconic Bollywood", "Three friends and a phone call", "Easy")
             )
         ),
         CharadesCategory(
@@ -50,7 +69,26 @@ object CharadesBank {
                 CharadesItem("Ghar Me Ram Gali Me Shyam", "Hardcore Bizarre", "80s double identity comedy", "Medium"),
                 CharadesItem("Matru Ki Bijlee Ka Mandola", "Hardcore Bizarre", "Quirky comedy with pink buffalo", "Medium"),
                 CharadesItem("Andaz Apna Apna", "Hardcore Bizarre", "Amar Prem & Crime Master Gogo", "Medium"),
-                CharadesItem("Gangs of Wasseypur", "Hardcore Bizarre", "Baap ka dada ka sabka badla lega Faizal", "Medium")
+                CharadesItem("Gangs of Wasseypur", "Hardcore Bizarre", "Baap ka dada ka sabka badla lega Faizal", "Medium"),
+                CharadesItem("Murde Ki Jaan Khatre Mein", "Hardcore Bizarre", "Strange title and mystery comedy", "Legend"),
+                CharadesItem("Laali Ki Shaadi Mein Laaddoo Deewana", "Hardcore Bizarre", "Wedding title with repeated L sounds", "Legend"),
+                CharadesItem("Khosla Ka Ghosla", "Hardcore Bizarre", "Family fights a property grabber", "Medium"),
+                CharadesItem("Oye Lucky! Lucky Oye!", "Hardcore Bizarre", "Charming thief steals everything", "Medium"),
+                CharadesItem("Mithya", "Hardcore Bizarre", "Actor trapped in mistaken identity", "Legend"),
+                CharadesItem("Ek Chalis Ki Last Local", "Hardcore Bizarre", "Late night train adventure", "Medium"),
+                CharadesItem("Phas Gaye Re Obama", "Hardcore Bizarre", "Kidnapping during recession", "Legend"),
+                CharadesItem("Luv Shuv Tey Chicken Khurana", "Hardcore Bizarre", "Secret recipe and family comedy", "Legend"),
+                CharadesItem("Tere Bin Laden", "Hardcore Bizarre", "Lookalike political comedy", "Medium"),
+                CharadesItem("Manorama Six Feet Under", "Hardcore Bizarre", "Small town private detective", "Legend"),
+                CharadesItem("Mard Ko Dard Nahi Hota", "Hardcore Bizarre", "Hero cannot feel pain", "Medium"),
+                CharadesItem("Detective Byomkesh Bakshy!", "Hardcore Bizarre", "Detective solves wartime mystery", "Medium"),
+                CharadesItem("Kaminey", "Hardcore Bizarre", "Twins with speech differences", "Medium"),
+                CharadesItem("Maqbool", "Hardcore Bizarre", "Gangster Macbeth adaptation", "Legend"),
+                CharadesItem("Tumbbad", "Hardcore Bizarre", "Ancient treasure and cursed creature", "Medium"),
+                CharadesItem("Sulemani Keeda", "Hardcore Bizarre", "Two writers chase Bollywood dreams", "Legend"),
+                CharadesItem("Udaan", "Hardcore Bizarre", "Teen escapes strict father", "Medium"),
+                CharadesItem("Ship of Theseus", "Hardcore Bizarre", "Three philosophical stories", "Legend"),
+                CharadesItem("Ankhon Dekhi", "Hardcore Bizarre", "Man believes only what he sees", "Legend")
             )
         ),
         CharadesCategory(
@@ -66,7 +104,29 @@ object CharadesBank {
                 CharadesItem("Pushpa, I Hate Tears Re", "Famous Dialogues", "Rajesh Khanna in Amar Prem", "Medium"),
                 CharadesItem("Tareekh Pe Tareekh!", "Famous Dialogues", "Sunny Deol Damini courtroom roar", "Easy"),
                 CharadesItem("Crime Master Gogo, Aankhein Nikaal Ke Gotiyan Khelunga", "Famous Dialogues", "Andaz Apna Apna", "Medium"),
-                CharadesItem("Parampara, Pratishtha, Anushasan", "Famous Dialogues", "Mohabbatein Gurukul principal rules", "Medium")
+                CharadesItem("Parampara, Pratishtha, Anushasan", "Famous Dialogues", "Mohabbatein Gurukul principal rules", "Medium"),
+                CharadesItem("Bade Bade Deshon Mein Aisi Chhoti Chhoti Baatein", "Famous Dialogues", "DDLJ train station wisdom", "Easy"),
+                CharadesItem("Mere Paas Maa Hai", "Famous Dialogues", "Deewar emotional confrontation", "Easy"),
+                CharadesItem("Don Ka Intezaar Toh Gyarah Mulkon Ki Police Kar Rahi Hai", "Famous Dialogues", "Don confidence and swagger", "Medium"),
+                CharadesItem("Mogambo Khush Hua", "Famous Dialogues", "Villain laughs and celebrates", "Easy"),
+                CharadesItem("All Is Well", "Famous Dialogues", "3 Idiots calming gesture", "Easy"),
+                CharadesItem("How's the Josh? High Sir!", "Famous Dialogues", "Uri army motivation call", "Easy"),
+                CharadesItem("Rahul Naam Toh Suna Hoga", "Famous Dialogues", "Romantic introduction", "Easy"),
+                CharadesItem("Jaa Simran Jaa, Jee Le Apni Zindagi", "Famous Dialogues", "Father lets daughter run to train", "Easy"),
+                CharadesItem("Aata Majhi Satakli", "Famous Dialogues", "Singham angry warning", "Easy"),
+                CharadesItem("Thappad Se Darr Nahi Lagta Sahib", "Famous Dialogues", "Fearless gangster response", "Medium"),
+                CharadesItem("Don ko Pakadna Mushkil Hai", "Famous Dialogues", "Smug villain escape", "Easy"),
+                CharadesItem("Babu Moshai Zindagi Badi Honi Chahiye", "Famous Dialogues", "Anand life lesson", "Medium"),
+                CharadesItem("Rishte Mein Toh Hum Tumhare Baap Lagte Hain", "Famous Dialogues", "Shahenshah introduction", "Easy"),
+                CharadesItem("Keh Diya Na Bas Keh Diya", "Famous Dialogues", "Family argument final word", "Easy"),
+                CharadesItem("Mujhe Ghar Jaana Hai", "Famous Dialogues", "Emotional character pleading", "Easy"),
+                CharadesItem("Tumse Na Ho Payega", "Famous Dialogues", "Dismissive challenge", "Easy"),
+                CharadesItem("Control Uday Control", "Famous Dialogues", "Comedy character calming friend", "Easy"),
+                CharadesItem("Aap Purush Hi Nahin Mahapurush Hain", "Famous Dialogues", "Over-the-top compliment", "Medium"),
+                CharadesItem("Beta Tumse Na Ho Payega", "Famous Dialogues", "Panchayat motivational taunt", "Easy"),
+                CharadesItem("Jhakaas", "Famous Dialogues", "Anil Kapoor approving gesture", "Easy"),
+                CharadesItem("Sattar Minute", "Famous Dialogues", "Coach gives final match speech", "Medium"),
+                CharadesItem("Picture Abhi Baaki Hai", "Famous Dialogues", "Film ending tease", "Easy")
             )
         ),
         CharadesCategory(
@@ -80,7 +140,31 @@ object CharadesBank {
                 CharadesItem("Virat Kohli Six Against Haris Rauf at MCG", "Cricket", "Back foot straight punch over long-on 2022", "Medium"),
                 CharadesItem("Kapil Dev 175 Not Out Running Catch 1983", "Cricket", "1983 World Cup finals running backward catch", "Medium"),
                 CharadesItem("Sachin Tendulkar Desert Storm in Sharjah", "Cricket", "1998 blasting Warne and Kasprowicz in sandstorm", "Medium"),
-                CharadesItem("Ravindra Jadeja Sword Celebration", "Cricket", "Twirling bat like Rajput sword", "Easy")
+                CharadesItem("Ravindra Jadeja Sword Celebration", "Cricket", "Twirling bat like Rajput sword", "Easy"),
+                CharadesItem("Rohit Sharma Pull Shot", "Cricket", "Effortless pull over the boundary", "Easy"),
+                CharadesItem("Virat Kohli Aggressive Celebration", "Cricket", "Pointing and roaring after wicket", "Easy"),
+                CharadesItem("Hardik Pandya Helicopter Shot", "Cricket", "Big bat swing and sunglasses", "Easy"),
+                CharadesItem("Yuvraj Singh Six Sixes", "Cricket", "Six balls flying out of ground", "Easy"),
+                CharadesItem("Bumrah Yorker", "Cricket", "Fast bowler knocks over stumps", "Easy"),
+                CharadesItem("Anil Kumble Ten Wickets", "Cricket", "Spin bowler celebrates every wicket", "Medium"),
+                CharadesItem("Ashwin Carrom Ball", "Cricket", "Finger spin with a surprise turn", "Medium"),
+                CharadesItem("Sania Mirza Tennis Smash", "Cricket", "Racket swing and celebration", "Easy"),
+                CharadesItem("Ganguly NatWest Trophy Wave", "Cricket", "Shirt waving from balcony", "Easy"),
+                CharadesItem("Sachin Straight Drive", "Cricket", "Perfect bat pose down the ground", "Easy"),
+                CharadesItem("Dhoni Helicopter Finish", "Cricket", "Captain hits final ball and raises bat", "Easy"),
+                CharadesItem("Cricket DRS Review", "Cricket", "Hands forming television review sign", "Easy"),
+                CharadesItem("Umpire Out Finger", "Cricket", "Index finger raised after appeal", "Easy"),
+                CharadesItem("Wicketkeeper Stumping", "Cricket", "Gloves whip off bails", "Easy"),
+                CharadesItem("Boundary Diving Catch", "Cricket", "Flying sideways to catch ball", "Easy"),
+                CharadesItem("Opening Batsmen Walk Out", "Cricket", "Two bats with helmets to pitch", "Easy"),
+                CharadesItem("Super Over", "Cricket", "One dramatic tie-breaker over", "Medium"),
+                CharadesItem("Cricket World Cup Lift", "Cricket", "Team lifts trophy together", "Easy"),
+                CharadesItem("Fast Bowler Run Up", "Cricket", "Long sprint then powerful delivery", "Easy"),
+                CharadesItem("Leg Spinner Googly", "Cricket", "Spin ball surprises batsman", "Medium"),
+                CharadesItem("Night Match Floodlights", "Cricket", "Looking up under bright stadium lights", "Easy"),
+                CharadesItem("Batting Gloves Change", "Cricket", "Adjusting gloves before facing ball", "Easy"),
+                CharadesItem("Third Umpire Replay", "Cricket", "Watching slow-motion replay on screen", "Easy"),
+                CharadesItem("Fielder Boundary Save", "Cricket", "Sliding to stop a four", "Easy")
             )
         ),
         CharadesCategory(
@@ -93,9 +177,44 @@ object CharadesBank {
                 CharadesItem("Catching Mumbai Local Train in Peak Rush Hour", "Desi Actions", "Hanging on door with backpack", "Easy"),
                 CharadesItem("Relative Forcing 500 Rupee Note into Pocket", "Desi Actions", "Saying 'Nahi nahi uncle' with open pocket", "Easy"),
                 CharadesItem("Baraat Naagin Dance on the Road", "Desi Actions", "Lying on ground playing imaginary pungi", "Easy"),
-                CharadesItem("Watching India vs Pakistan Match with Neighbours", "Desi Actions", "Biting nails screaming 'Out hai!'", "Easy")
+                CharadesItem("Watching India vs Pakistan Match with Neighbours", "Desi Actions", "Biting nails screaming 'Out hai!'", "Easy"),
+                CharadesItem("Auto Driver Refusing Meter", "Desi Actions", "Negotiating fare with hand gestures", "Easy"),
+                CharadesItem("Aunty Asking Exam Marks", "Desi Actions", "Nervous student hiding report card", "Easy"),
+                CharadesItem("Monsoon Puddle Jump", "Desi Actions", "Avoiding muddy water in sandals", "Easy"),
+                CharadesItem("Power Cut Candle Search", "Desi Actions", "Feeling around for phone flashlight", "Easy"),
+                CharadesItem("Pressure Cooker Whistle", "Desi Actions", "Counting whistles in kitchen", "Easy"),
+                CharadesItem("Wedding Photographer Pose", "Desi Actions", "Slow-motion family pose", "Easy"),
+                CharadesItem("Queue Cutting at Chaat Stall", "Desi Actions", "Sneaking into a long line", "Easy"),
+                CharadesItem("Finding a Seat in Local Train", "Desi Actions", "Squeezing through crowded compartment", "Easy"),
+                CharadesItem("Bargaining at Flea Market", "Desi Actions", "Walking away then returning with lower price", "Easy"),
+                CharadesItem("Samosa Burns Tongue", "Desi Actions", "Fan mouth after hot bite", "Easy"),
+                CharadesItem("Applying Mosquito Repellent", "Desi Actions", "Slapping imaginary mosquito", "Easy"),
+                CharadesItem("Family WhatsApp Good Morning", "Desi Actions", "Sending flower sunrise message", "Easy"),
+                CharadesItem("Secretly Eating Mithai", "Desi Actions", "Looking around before sweet bite", "Easy"),
+                CharadesItem("Losing One Slipper", "Desi Actions", "Hopping while searching", "Easy"),
+                CharadesItem("Carrom Champion Strike", "Desi Actions", "Flicking striker and celebrating", "Easy"),
+                CharadesItem("Cricket in Narrow Lane", "Desi Actions", "Dodging parked scooters while batting", "Easy"),
+                CharadesItem("Making Chai for Guests", "Desi Actions", "Boiling tea and serving cups", "Easy"),
+                CharadesItem("Temple Bell and Prasad", "Desi Actions", "Ring bell then receive sweet", "Easy"),
+                CharadesItem("School Bus Missed", "Desi Actions", "Running behind bus with bag", "Easy"),
+                CharadesItem("Dancing at Sangeet", "Desi Actions", "Practicing wedding choreography", "Easy"),
+                CharadesItem("Rooftop Kite Fight", "Desi Actions", "Pulling string and shouting victory", "Easy"),
+                CharadesItem("Getting Henna Applied", "Desi Actions", "Holding hand still while drying", "Easy"),
+                CharadesItem("Eating Pani Puri", "Desi Actions", "Rapidly accepting golgappa plates", "Easy"),
+                CharadesItem("Searching for Wi-Fi Password", "Desi Actions", "Pointing at router and typing", "Easy"),
+                CharadesItem("Uncle Falling Asleep at Wedding", "Desi Actions", "Nodding off beside loud music", "Easy")
             )
         )
     )
+
+    val allCategories = CharadesCategory(
+        id = "all",
+        title = "All Categories",
+        icon = "🎲",
+        description = "A random mix of movies, dialogues, cricket and desi moments",
+        items = playableCategories.flatMap { it.items }
+    )
+
+    val categories: List<CharadesCategory> = listOf(allCategories) + playableCategories
 }
 
