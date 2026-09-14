@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.desipartygames.core.AppLanguage
 import com.desipartygames.core.AppStrings
 import com.desipartygames.core.GameRules
@@ -42,6 +43,7 @@ fun ImposterGameScreen(
     var newPlayerName by rememberSaveable { mutableStateOf("") }
     var showTutorialDialog by rememberSaveable { mutableStateOf(false) }
     var showMinimumPlayersDialog by rememberSaveable { mutableStateOf(false) }
+    var showSettingsDialog by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -52,8 +54,7 @@ fun ImposterGameScreen(
                 language = language,
                 onLanguageSelected = onLanguageSelected,
                 onBackClick = onNavigateBack,
-                onRulesClick = { showTutorialDialog = true },
-                onScoreboardClick = { viewModel.setScoreboardOpen(true) }
+                onRulesClick = { showTutorialDialog = true }
             )
         },
         containerColor = SleekBg
@@ -67,7 +68,6 @@ fun ImposterGameScreen(
                 ImposterGameState.SETUP -> {
                     ImposterSetupView(
                         uiState = uiState,
-                        language = language,
                         newPlayerName = newPlayerName,
                         onPlayerNameChanged = { newPlayerName = it },
                         onAddPlayer = {
@@ -75,8 +75,7 @@ fun ImposterGameScreen(
                             newPlayerName = ""
                         },
                         onRemovePlayer = { viewModel.removePlayer(it) },
-                        onSelectCategory = { viewModel.selectCategory(it) },
-                        onSetImposterCount = { viewModel.setImposterCount(it) },
+                        onSettingsClick = { showSettingsDialog = true },
                         onStartGame = {
                             if (uiState.players.size < GameRules.minimumPlayers(GameRules.IMPOSTER)) {
                                 showMinimumPlayersDialog = true
@@ -107,7 +106,6 @@ fun ImposterGameScreen(
                 ImposterGameState.DISCUSSION -> {
                     ImposterDiscussionView(
                         uiState = uiState,
-                        language = language,
                         onStartVoting = {
                             SoundEffects.playClick(context)
                             viewModel.startVotingPhase()
@@ -118,7 +116,6 @@ fun ImposterGameScreen(
                 ImposterGameState.VOTING -> {
                     ImposterVotingView(
                         uiState = uiState,
-                        language = language,
                         onSelectAccused = { viewModel.selectAccusedPlayer(it) },
                         onConfirmVoting = {
                             SoundEffects.playFanfare(context)
@@ -130,7 +127,6 @@ fun ImposterGameScreen(
                 ImposterGameState.REVEAL, ImposterGameState.SUMMARY -> {
                     ImposterRevealView(
                         uiState = uiState,
-                        language = language,
                         onNextRound = {
                             SoundEffects.playClick(context)
                             viewModel.playNextRound()
@@ -159,16 +155,17 @@ fun ImposterGameScreen(
                 )
             }
 
-            // Scoreboard Modal
-            if (uiState.isScoreboardOpen) {
-                ScoreBoardDialog(
-                    scores = uiState.scores,
-                    title = "Imposter Game Scores",
+            if (showSettingsDialog) {
+                ImposterSettingsDialog(
+                    selectedCategory = uiState.selectedCategory,
+                    imposterCount = uiState.imposterCount,
                     language = language,
-                    onScoreChanged = { idx, score -> viewModel.updateScore(idx, score) },
-                    onDismiss = { viewModel.setScoreboardOpen(false) }
+                    onSelectCategory = { viewModel.selectCategory(it) },
+                    onSetImposterCount = { viewModel.setImposterCount(it) },
+                    onDismiss = { showSettingsDialog = false }
                 )
             }
+
         }
     }
 }
@@ -176,16 +173,13 @@ fun ImposterGameScreen(
 @Composable
 fun ImposterSetupView(
     uiState: ImposterUiState,
-    language: AppLanguage,
     newPlayerName: String,
     onPlayerNameChanged: (String) -> Unit,
     onAddPlayer: () -> Unit,
     onRemovePlayer: (Int) -> Unit,
-    onSelectCategory: (com.desipartygames.data.content.ImposterCategory) -> Unit,
-    onSetImposterCount: (Int) -> Unit,
+    onSettingsClick: () -> Unit,
     onStartGame: () -> Unit
 ) {
-    val context = LocalContext.current
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -193,111 +187,20 @@ fun ImposterSetupView(
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         item {
-            Text(
-                text = "1. Choose Category",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = SleekPurple
-            )
-        }
-
-        items(ImposterWordsBank.categories) { cat ->
-            val isSelected = cat.id == uiState.selectedCategory.id
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .clickable {
-                        SoundEffects.playClick(context)
-                        onSelectCategory(cat)
-                    }
-                    .border(
-                        if (isSelected) 2.dp else 1.dp,
-                        if (isSelected) SleekPurple else SleekSurfaceBorder,
-                        RoundedCornerShape(16.dp)
-                    ),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (isSelected) SleekPurpleContainer else SleekSurfaceCard
-                )
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    Text(text = cat.icon, fontSize = 28.sp)
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = if (language == AppLanguage.HINDI) cat.titleHindi else cat.title,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isSelected) SleekOnPurpleContainer else SleekTextPrimary
-                        )
-                        Text(
-                            text = "${cat.words.size} authentic Indian words",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (isSelected) SleekOnPurpleContainer.copy(alpha = 0.8f) else SleekTextSecondary
-                        )
-                    }
-                    if (isSelected) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = "Selected", tint = SleekPurple)
-                    }
-                }
-            }
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = "2. Number of Imposters",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = SleekPurple
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                listOf(1, 2).forEach { count ->
-                    val isSelected = uiState.imposterCount == count
-                    Button(
-                        onClick = {
-                            SoundEffects.playClick(context)
-                            onSetImposterCount(count)
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isSelected) SleekPurple else SleekSurfaceElevated,
-                            contentColor = if (isSelected) Color.White else SleekTextPrimary
-                        ),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = if (count == 1) "1 Imposter" else "2 Imposters",
-                            fontWeight = FontWeight.Bold,
-                            color = if (isSelected) Color.White else SleekTextPrimary
-                        )
-                    }
-                }
-            }
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(6.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "3. Players (${uiState.players.size})",
+                    text = "Players (${uiState.players.size})",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = SleekPurple
                 )
-                Text(
-                    text = "Min: 3 players",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = SleekTextSecondary
-                )
+                IconButton(onClick = onSettingsClick) {
+                    Icon(Icons.Default.Settings, contentDescription = "Game settings", tint = SleekPurple)
+                }
             }
         }
 
@@ -409,9 +312,122 @@ fun ImposterSetupView(
 }
 
 @Composable
+private fun ImposterSettingsDialog(
+    selectedCategory: com.desipartygames.data.content.ImposterCategory,
+    imposterCount: Int,
+    language: AppLanguage,
+    onSelectCategory: (com.desipartygames.data.content.ImposterCategory) -> Unit,
+    onSetImposterCount: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = SleekSurfaceCard)
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Game Settings",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = SleekTextPrimary
+                    )
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Default.Close, contentDescription = "Close settings")
+                    }
+                }
+
+                Text(
+                    text = "Choose category",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = SleekPurple
+                )
+
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 280.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(ImposterWordsBank.categories) { category ->
+                        val isSelected = category.id == selectedCategory.id
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onSelectCategory(category) },
+                            shape = RoundedCornerShape(14.dp),
+                            color = if (isSelected) SleekPurpleContainer else SleekSurfaceElevated,
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.dp,
+                                if (isSelected) SleekPurple else SleekSurfaceBorder
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Text(category.icon, fontSize = 24.sp)
+                                Text(
+                                    text = if (language == AppLanguage.HINDI) category.titleHindi else category.title,
+                                    modifier = Modifier.weight(1f),
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isSelected) SleekOnPurpleContainer else SleekTextPrimary
+                                )
+                                if (isSelected) {
+                                    Icon(Icons.Default.CheckCircle, contentDescription = "Selected", tint = SleekPurple)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Text(
+                    text = "Number of imposters",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = SleekPurple
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    listOf(1, 2).forEach { count ->
+                        val isSelected = imposterCount == count
+                        Button(
+                            onClick = { onSetImposterCount(count) },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isSelected) SleekPurple else SleekSurfaceElevated,
+                                contentColor = if (isSelected) Color.White else SleekTextPrimary
+                            )
+                        ) {
+                            Text(if (count == 1) "1 Imposter" else "2 Imposters")
+                        }
+                    }
+                }
+
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text("Done")
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun ImposterDiscussionView(
     uiState: ImposterUiState,
-    language: AppLanguage,
     onStartVoting: () -> Unit
 ) {
     Column(
@@ -490,7 +506,6 @@ fun ImposterDiscussionView(
 @Composable
 fun ImposterVotingView(
     uiState: ImposterUiState,
-    language: AppLanguage,
     onSelectAccused: (Int) -> Unit,
     onConfirmVoting: () -> Unit
 ) {
@@ -612,7 +627,6 @@ fun ImposterVotingView(
 @Composable
 fun ImposterRevealView(
     uiState: ImposterUiState,
-    language: AppLanguage,
     onNextRound: () -> Unit
 ) {
     Column(
@@ -694,7 +708,9 @@ fun ImposterRevealView(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -714,6 +730,12 @@ fun ImposterRevealView(
                                 text = if (a.isImposter) "🕵️‍♂️ IMPOSTER" else "😇 INNOCENT",
                                 fontWeight = FontWeight.ExtraBold,
                                 color = if (a.isImposter) CrimsonRed else EmeraldGreen
+                            )
+
+                            Text(
+                                text = "${uiState.scores.getOrNull(uiState.assignments.indexOf(a))?.score ?: 0} pts",
+                                fontWeight = FontWeight.Bold,
+                                color = SleekPurple
                             )
                         }
                     }

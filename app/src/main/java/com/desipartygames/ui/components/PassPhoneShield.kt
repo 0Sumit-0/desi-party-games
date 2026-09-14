@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -55,20 +56,19 @@ fun PassPhoneDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.6f))
-                .padding(24.dp)
+                .background(Color.Black.copy(alpha = 0.92f))
                 .testTag("pass_phone_dialog"),
             contentAlignment = Alignment.Center
         ) {
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .scale(scale)
-                    .clip(RoundedCornerShape(28.dp))
+                    .clip(RoundedCornerShape(0.dp))
                     .border(
                         1.5.dp,
                         if (isRevealed) (if (isImposterOrSpecial) SleekRose else SleekPurple) else SleekSurfaceBorder,
-                        RoundedCornerShape(28.dp)
+                        RoundedCornerShape(0.dp)
                     ),
                 colors = CardDefaults.cardColors(containerColor = SleekSurfaceCard),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
@@ -76,7 +76,7 @@ fun PassPhoneDialog(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(24.dp),
+                        .padding(horizontal = 28.dp, vertical = 40.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(18.dp)
                 ) {
@@ -147,8 +147,8 @@ fun PassPhoneDialog(
                                 modifier = Modifier.padding(16.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Lock,
-                                    contentDescription = "Hidden",
+                                    imageVector = if (isRevealed) Icons.Default.LockOpen else Icons.Default.Lock,
+                                    contentDescription = if (isRevealed) "Unlocked" else "Locked",
                                     tint = SleekPurple,
                                     modifier = Modifier.size(36.dp)
                                 )

@@ -33,7 +33,7 @@ data class ImposterPlayerAssignment(
 
 data class ImposterUiState(
     val gameState: ImposterGameState = ImposterGameState.SETUP,
-    val selectedCategory: ImposterCategory = ImposterWordsBank.categories.first(),
+    val selectedCategory: ImposterCategory = ImposterWordsBank.allCategories,
     val imposterCount: Int = 1,
     val discussionSeconds: Int = 120,
     val players: List<PlayerEntity> = emptyList(),
