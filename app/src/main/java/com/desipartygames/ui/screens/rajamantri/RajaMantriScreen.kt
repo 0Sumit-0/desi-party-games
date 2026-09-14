@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,8 +37,8 @@ fun RajaMantriScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    var newPlayerName by remember { mutableStateOf("") }
-    var showTutorialDialog by remember { mutableStateOf(false) }
+    var newPlayerName by rememberSaveable { mutableStateOf("") }
+    var showTutorialDialog by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -386,7 +387,7 @@ fun RajaCallCourtView(
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = "Raja (${raja?.name ?: "Maharaj"}) asks who the Mantri is!",
+                        text = "Raja asks who the Mantri is!",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.White.copy(alpha = 0.9f)
                     )
@@ -414,7 +415,7 @@ fun RajaCallCourtView(
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = "Mantri (${mantri?.name ?: "Mantri"}) reveals identity to the court!",
+                        text = "Mantri reveals identity to the court!",
                         style = MaterialTheme.typography.bodySmall,
                         color = SleekTextSecondary
                     )
@@ -480,7 +481,7 @@ fun SipahiGuessView(
             )
 
             Text(
-                text = "Sipahi (${sipahi?.name ?: "Sipahi"}), look closely at the remaining players. Which one is the Chor?",
+                text = "Sipahi, look closely at the remaining players. Which one is the Chor?",
                 style = MaterialTheme.typography.bodyMedium,
                 color = SleekTextSecondary,
                 textAlign = TextAlign.Center

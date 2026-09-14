@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,8 +39,8 @@ fun TruthOrDareScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    var showAgeGateModal by remember { mutableStateOf(false) }
-    var showTutorialDialog by remember { mutableStateOf(false) }
+    var showAgeGateModal by rememberSaveable { mutableStateOf(false) }
+    var showTutorialDialog by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -550,9 +551,9 @@ fun AddCustomPromptDialog(
     onDismiss: () -> Unit,
     onSave: (type: String, category: String, text: String) -> Unit
 ) {
-    var promptType by remember { mutableStateOf("TRUTH") }
-    var category by remember { mutableStateOf("FRIENDS") }
-    var text by remember { mutableStateOf("") }
+    var promptType by rememberSaveable { mutableStateOf("TRUTH") }
+    var category by rememberSaveable { mutableStateOf("FRIENDS") }
+    var text by rememberSaveable { mutableStateOf("") }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(

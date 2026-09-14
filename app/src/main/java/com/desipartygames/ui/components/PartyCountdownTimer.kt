@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,8 +36,8 @@ fun PartyCountdownTimer(
     onTimerFinished: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    var remainingSeconds by remember(totalSeconds) { mutableIntStateOf(totalSeconds) }
-    var isRunning by remember(isAutoStart) { mutableStateOf(isAutoStart) }
+    var remainingSeconds by rememberSaveable(totalSeconds) { mutableIntStateOf(totalSeconds) }
+    var isRunning by rememberSaveable(isAutoStart) { mutableStateOf(isAutoStart) }
 
     LaunchedEffect(isRunning, remainingSeconds) {
         if (isRunning && remainingSeconds > 0) {

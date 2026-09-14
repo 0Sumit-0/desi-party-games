@@ -12,6 +12,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,9 +36,31 @@ import com.desipartygames.ui.components.PartyTopBar
 import com.desipartygames.ui.theme.*
 
 data class DrawPath(
-    val path: Path,
-    val color: Color,
+    val points: List<Float>,
+    val colorIndex: Int,
     val strokeWidth: Float
+)
+
+private val drawPathListSaver = Saver<List<DrawPath>, ArrayList<ArrayList<Any>>>(
+    save = { paths ->
+        ArrayList(paths.map { path ->
+            ArrayList<Any>().apply {
+                add(ArrayList<Float>(path.points))
+                add(path.colorIndex)
+                add(path.strokeWidth)
+            }
+        })
+    },
+    restore = { saved ->
+        saved.map { rawPath ->
+            val path = rawPath as ArrayList<*>
+            DrawPath(
+                points = (path[0] as ArrayList<*>).map { (it as Number).toFloat() },
+                colorIndex = (path[1] as Number).toInt(),
+                strokeWidth = (path[2] as Number).toFloat()
+            )
+        }
+    }
 )
 
 @Composable
@@ -46,14 +70,18 @@ fun PictionaryScreen(
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val paths = remember { mutableStateListOf<DrawPath>() }
-    var currentPath by remember { mutableStateOf<Path?>(null) }
-    var selectedColor by remember { mutableStateOf(SleekPurple) }
-    var strokeWidth by remember { mutableFloatStateOf(8f) }
+    var paths by rememberSaveable(stateSaver = drawPathListSaver) {
+        mutableStateOf<List<DrawPath>>(emptyList())
+    }
+    var currentPoints: List<Float> by rememberSaveable {
+        mutableStateOf<List<Float>>(emptyList())
+    }
+    var selectedColorIndex: Int by rememberSaveable { mutableStateOf(0) }
+    var strokeWidth: Float by rememberSaveable { mutableStateOf(8f) }
 
     val prompts = MiniGamesBank.pictionaryPrompts
-    var currentPromptIndex by remember { mutableIntStateOf(0) }
-    var isWordRevealed by remember { mutableStateOf(false) }
+    var currentPromptIndex by rememberSaveable { mutableIntStateOf(0) }
+    var isWordRevealed by rememberSaveable { mutableStateOf(false) }
 
     val currentPrompt = prompts[currentPromptIndex % prompts.size]
 
@@ -66,7 +94,6 @@ fun PictionaryScreen(
         Color(0xFF1D1B20), // Charcoal
         Color(0xFF9333EA)  // Violet
     )
-
     Scaffold(
         topBar = {
             PartyTopBar(
@@ -132,7 +159,7 @@ fun PictionaryScreen(
                                 SoundEffects.playClick(context)
                                 currentPromptIndex += 1
                                 isWordRevealed = false
-                                paths.clear()
+                                paths = emptyList()
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = SleekPurpleContainer,
@@ -163,27 +190,32 @@ fun PictionaryScreen(
                         .pointerInput(Unit) {
                             detectDragGestures(
                                 onDragStart = { offset ->
-                                    val newPath = Path().apply { moveTo(offset.x, offset.y) }
-                                    currentPath = newPath
-                                    paths.add(DrawPath(newPath, selectedColor, strokeWidth))
+                                    currentPoints = listOf(offset.x, offset.y)
+                                    paths = paths + DrawPath(currentPoints, selectedColorIndex, strokeWidth)
                                 },
                                 onDrag = { change, _ ->
-                                    currentPath?.lineTo(change.position.x, change.position.y)
                                     if (paths.isNotEmpty()) {
-                                        val last = paths.removeAt(paths.lastIndex)
-                                        paths.add(last)
+                                        currentPoints = currentPoints + change.position.x + change.position.y
+                                        paths = paths.dropLast(1) + DrawPath(currentPoints, selectedColorIndex, strokeWidth)
                                     }
                                 },
                                 onDragEnd = {
-                                    currentPath = null
+                                    currentPoints = emptyList()
                                 }
                             )
                         }
                 ) {
                     paths.forEach { drawPath ->
+                        val path = Path().apply {
+                            drawPath.points.chunked(2).forEachIndexed { index, point ->
+                                if (point.size == 2) {
+                                    if (index == 0) moveTo(point[0], point[1]) else lineTo(point[0], point[1])
+                                }
+                            }
+                        }
                         drawPath(
-                            path = drawPath.path,
-                            color = drawPath.color,
+                            path = path,
+                            color = availableColors[drawPath.colorIndex],
                             style = Stroke(
                                 width = drawPath.strokeWidth,
                                 cap = StrokeCap.Round,
@@ -203,7 +235,8 @@ fun PictionaryScreen(
                 // Colors
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     availableColors.forEach { col ->
-                        val isSelected = selectedColor == col
+                        val colorIndex = availableColors.indexOf(col)
+                        val isSelected = selectedColorIndex == colorIndex
                         Box(
                             modifier = Modifier
                                 .size(34.dp)
@@ -214,7 +247,7 @@ fun PictionaryScreen(
                                     if (isSelected) SleekPurple else SleekBorderLight,
                                     CircleShape
                                 )
-                                .clickable { selectedColor = col }
+                                .clickable { selectedColorIndex = colorIndex }
                         )
                     }
                 }
@@ -225,7 +258,7 @@ fun PictionaryScreen(
                         onClick = {
                             if (paths.isNotEmpty()) {
                                 SoundEffects.playClick(context)
-                                paths.removeAt(paths.lastIndex)
+                                paths = paths.dropLast(1)
                             }
                         },
                         modifier = Modifier
@@ -239,7 +272,7 @@ fun PictionaryScreen(
                     IconButton(
                         onClick = {
                             SoundEffects.playClick(context)
-                            paths.clear()
+                            paths = emptyList()
                         },
                         modifier = Modifier
                             .clip(CircleShape)

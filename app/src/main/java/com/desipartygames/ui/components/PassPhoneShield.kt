@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,8 +43,8 @@ fun PassPhoneDialog(
     onDonePassing: () -> Unit
 ) {
     val context = LocalContext.current
-    var isRevealed by remember { mutableStateOf(false) }
-    var hasRevealedAtLeastOnce by remember { mutableStateOf(false) }
+    var isRevealed by rememberSaveable { mutableStateOf(false) }
+    var hasRevealedAtLeastOnce by rememberSaveable { mutableStateOf(false) }
 
     val scale by animateFloatAsState(if (isRevealed) 1.02f else 1f, label = "cardScale")
 

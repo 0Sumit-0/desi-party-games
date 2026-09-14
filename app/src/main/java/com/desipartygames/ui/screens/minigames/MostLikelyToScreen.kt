@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,9 +38,9 @@ fun MostLikelyToScreen(
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
-    var currentIndex by remember { mutableIntStateOf(0) }
-    var selectedPlayerIndex by remember { mutableStateOf<Int?>(null) }
-    var roundNumber by remember { mutableIntStateOf(1) }
+    var currentIndex by rememberSaveable { mutableIntStateOf(0) }
+    var selectedPlayerIndex by rememberSaveable { mutableStateOf<Int?>(null) }
+    var roundNumber by rememberSaveable { mutableIntStateOf(1) }
 
     val prompts = MiniGamesBank.mostLikelyPrompts
     val currentPrompt = prompts[currentIndex % prompts.size]

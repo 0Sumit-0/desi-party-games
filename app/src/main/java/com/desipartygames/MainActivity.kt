@@ -6,7 +6,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -32,6 +36,23 @@ import com.desipartygames.ui.screens.truthdare.TruthDareViewModel
 import com.desipartygames.ui.screens.truthdare.TruthOrDareScreen
 import com.desipartygames.ui.theme.DesiPartyTheme
 
+private class AppViewModelFactory(
+    private val repository: PartyGamesRepository
+) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return when {
+            modelClass.isAssignableFrom(HomeViewModel::class.java) -> HomeViewModel(repository)
+            modelClass.isAssignableFrom(ImposterViewModel::class.java) -> ImposterViewModel(repository)
+            modelClass.isAssignableFrom(RajaMantriViewModel::class.java) -> RajaMantriViewModel(repository)
+            modelClass.isAssignableFrom(TruthDareViewModel::class.java) -> TruthDareViewModel(repository)
+            modelClass.isAssignableFrom(AntakshariViewModel::class.java) -> AntakshariViewModel(repository)
+            modelClass.isAssignableFrom(CharadesViewModel::class.java) -> CharadesViewModel(repository)
+            else -> throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
+        } as T
+    }
+}
+
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,9 +65,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             DesiPartyTheme {
                 val navController = rememberNavController()
-                var currentLanguage by remember { mutableStateOf(AppLanguage.HINGLISH) }
+                var currentLanguage by rememberSaveable { mutableStateOf(AppLanguage.HINGLISH) }
+                val viewModelFactory = remember { AppViewModelFactory(repository) }
 
-                val homeViewModel = remember { HomeViewModel(repository) }
+                val homeViewModel: HomeViewModel = viewModel(factory = viewModelFactory)
                 val homeUiState by homeViewModel.uiState.collectAsState()
 
                 NavHost(
@@ -68,7 +90,7 @@ class MainActivity : ComponentActivity() {
 
                     // 2. Who's The Imposter Game
                     composable("game_imposter") {
-                        val imposterViewModel = remember { ImposterViewModel(repository) }
+                        val imposterViewModel: ImposterViewModel = viewModel(factory = viewModelFactory)
                         ImposterGameScreen(
                             viewModel = imposterViewModel,
                             language = currentLanguage,
@@ -79,7 +101,7 @@ class MainActivity : ComponentActivity() {
 
                     // 3. Raja Mantri Chor Sipahi
                     composable("game_raja_mantri") {
-                        val rajaViewModel = remember { RajaMantriViewModel(repository) }
+                        val rajaViewModel: RajaMantriViewModel = viewModel(factory = viewModelFactory)
                         RajaMantriScreen(
                             viewModel = rajaViewModel,
                             language = currentLanguage,
@@ -90,7 +112,7 @@ class MainActivity : ComponentActivity() {
 
                     // 4. Truth or Dare
                     composable("game_truth_dare") {
-                        val truthDareViewModel = remember { TruthDareViewModel(repository) }
+                        val truthDareViewModel: TruthDareViewModel = viewModel(factory = viewModelFactory)
                         TruthOrDareScreen(
                             viewModel = truthDareViewModel,
                             language = currentLanguage,
@@ -101,7 +123,7 @@ class MainActivity : ComponentActivity() {
 
                     // 5. Antakshari Master
                     composable("game_antakshari") {
-                        val antakshariViewModel = remember { AntakshariViewModel(repository) }
+                        val antakshariViewModel: AntakshariViewModel = viewModel(factory = viewModelFactory)
                         AntakshariScreen(
                             viewModel = antakshariViewModel,
                             language = currentLanguage,
@@ -112,7 +134,7 @@ class MainActivity : ComponentActivity() {
 
                     // 6. Dumb Charades / Bollywood Acting
                     composable("game_charades") {
-                        val charadesViewModel = remember { CharadesViewModel(repository) }
+                        val charadesViewModel: CharadesViewModel = viewModel(factory = viewModelFactory)
                         CharadesScreen(
                             viewModel = charadesViewModel,
                             language = currentLanguage,
