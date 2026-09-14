@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.desipartygames.core.AppLanguage
 import com.desipartygames.core.AppStrings
 import com.desipartygames.core.SoundEffects
+import com.desipartygames.core.randomDifferentFrom
 import com.desipartygames.data.content.MiniGamesBank
 import com.desipartygames.data.local.entity.PlayerEntity
 import com.desipartygames.ui.components.PartyTopBar
@@ -38,11 +39,11 @@ fun MostLikelyToScreen(
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
-    var currentIndex by rememberSaveable { mutableIntStateOf(0) }
+    val prompts = MiniGamesBank.mostLikelyPrompts
+    var currentIndex by rememberSaveable { mutableIntStateOf((prompts.indices).random()) }
     var selectedPlayerIndex by rememberSaveable { mutableStateOf<Int?>(null) }
     var roundNumber by rememberSaveable { mutableIntStateOf(1) }
 
-    val prompts = MiniGamesBank.mostLikelyPrompts
     val currentPrompt = prompts[currentIndex % prompts.size]
 
     val promptText = when (language) {
@@ -94,8 +95,8 @@ fun MostLikelyToScreen(
                             shape = RoundedCornerShape(100.dp),
                             color = SleekPurpleContainer
                         ) {
-                            Text(
-                                text = "👉 WHO IS MOST LIKELY TO...",
+                                Text(
+                                    text = "👉 WHO IS MOST LIKELY TO...",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = SleekOnPurpleContainer,
@@ -198,7 +199,7 @@ fun MostLikelyToScreen(
             Button(
                 onClick = {
                     SoundEffects.playClick(context)
-                    currentIndex += 1
+                    currentIndex = randomDifferentFrom(prompts.indices.toList(), currentIndex)
                     roundNumber += 1
                     selectedPlayerIndex = null
                 },

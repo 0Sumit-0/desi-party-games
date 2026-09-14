@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.desipartygames.core.AppLanguage
 import com.desipartygames.core.AppStrings
 import com.desipartygames.core.SoundEffects
+import com.desipartygames.core.randomDifferentFrom
 import com.desipartygames.data.content.MiniGamesBank
 import com.desipartygames.ui.components.PartyTopBar
 import com.desipartygames.ui.theme.*
@@ -34,11 +35,11 @@ fun WouldYouRatherScreen(
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
-    var currentIndex by rememberSaveable { mutableIntStateOf(0) }
+    val prompts = MiniGamesBank.wouldYouRatherPrompts
+    var currentIndex by rememberSaveable { mutableIntStateOf(prompts.indices.random()) }
     var selectedOption by rememberSaveable { mutableStateOf<String?>(null) } // "A" or "B"
     var roundNumber by rememberSaveable { mutableIntStateOf(1) }
 
-    val prompts = MiniGamesBank.wouldYouRatherPrompts
     val currentPrompt = prompts[currentIndex % prompts.size]
 
     val optAText = when (language) {
@@ -233,7 +234,7 @@ fun WouldYouRatherScreen(
             Button(
                 onClick = {
                     SoundEffects.playClick(context)
-                    currentIndex += 1
+                    currentIndex = randomDifferentFrom(prompts.indices.toList(), currentIndex)
                     roundNumber += 1
                     selectedOption = null
                 },

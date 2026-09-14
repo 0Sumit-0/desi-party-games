@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.random.Random
 import com.desipartygames.core.AppLanguage
 import com.desipartygames.core.AppStrings
 import com.desipartygames.core.SoundEffects
@@ -80,7 +81,9 @@ fun PictionaryScreen(
     var strokeWidth: Float by rememberSaveable { mutableStateOf(8f) }
 
     val prompts = MiniGamesBank.pictionaryPrompts
-    var currentPromptIndex by rememberSaveable { mutableIntStateOf(0) }
+    var currentPromptIndex by rememberSaveable {
+        mutableIntStateOf(Random.nextInt(prompts.size))
+    }
     var isWordRevealed by rememberSaveable { mutableStateOf(false) }
 
     val currentPrompt = prompts[currentPromptIndex % prompts.size]
@@ -157,7 +160,7 @@ fun PictionaryScreen(
                         Button(
                             onClick = {
                                 SoundEffects.playClick(context)
-                                currentPromptIndex += 1
+                                currentPromptIndex = nextPromptIndex(currentPromptIndex, prompts.size)
                                 isWordRevealed = false
                                 paths = emptyList()
                             },
@@ -285,4 +288,13 @@ fun PictionaryScreen(
             }
         }
     }
+}
+
+private fun nextPromptIndex(currentIndex: Int, promptCount: Int): Int {
+    if (promptCount <= 1) return 0
+    var nextIndex = Random.nextInt(promptCount)
+    while (nextIndex == currentIndex) {
+        nextIndex = Random.nextInt(promptCount)
+    }
+    return nextIndex
 }

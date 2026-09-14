@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desipartygames.data.content.ImposterCategory
 import com.desipartygames.data.content.ImposterWordsBank
+import com.desipartygames.core.randomDifferentFrom
 import com.desipartygames.data.local.entity.PlayerEntity
 import com.desipartygames.data.repository.PartyGamesRepository
 import com.desipartygames.ui.components.PlayerScore
@@ -52,6 +53,7 @@ class ImposterViewModel(private val repository: PartyGamesRepository) : ViewMode
 
     private val _uiState = MutableStateFlow(ImposterUiState())
     val uiState: StateFlow<ImposterUiState> = _uiState.asStateFlow()
+    private var lastWord: String? = null
 
     init {
         // 1. Launch on Dispatchers.IO to keep the UI thread fast and smooth
@@ -118,7 +120,8 @@ class ImposterViewModel(private val repository: PartyGamesRepository) : ViewMode
 
     fun startNewGame() {
         val category = _uiState.value.selectedCategory
-        val word = category.words.random()
+        val word = randomDifferentFrom(category.words, lastWord)
+        lastWord = word
         val players = _uiState.value.players
         val imposterCount = _uiState.value.imposterCount.coerceAtMost(players.size - 1)
 

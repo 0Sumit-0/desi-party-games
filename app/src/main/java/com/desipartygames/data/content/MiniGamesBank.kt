@@ -103,10 +103,15 @@ object MiniGamesBank {
     )
 
     val pictionaryPrompts = listOf(
-        "Pani Puri Stall", "Rickshaw with colorful horn", "Taj Mahal",
-        "Cup of Cutting Chai", "Cricket Bat & Stumps", "Diwali Diya & Rangoli",
-        "Police Walrus Mustache", "Royal Crown on Cushion", "Indian Wedding Horse (Ghodi)",
-        "Pressure Cooker Whistle", "Samosa with Red Chutney", "Kite Flying in Sky",
-        "Bollywood Hero Sunglasses", "Hostel Maggi Bowl", "Peacock Dancing in Rain"
+        "Samosa", "Lassi", "Jalebi", "Dhol", "Tabla", "Sitar", "Bansuri", "Ghungroo",
+        "Diya", "Rangoli", "Patang", "Rickshaw", "Auto", "TukTuk", "Elephant", "Peacock",
+        "Tiger", "Cobra", "Camel", "Monkey", "Lotus", "Mango", "Coconut", "Banana",
+        "Chai", "Kettle", "Tiffin", "Maggi", "Dosa", "Idli", "Paratha", "Biryani",
+        "Golgappa", "Kachori", "Dhokla", "Kulfi", "Ladoo", "Kite", "Cricket", "Bat",
+        "Stumps", "Wicket", "Helmet", "Guitar", "Microphone", "Camera", "Clapperboard", "Crown",
+        "Throne", "Palace", "Temple", "Fort", "TajMahal", "Mountain", "Rainbow", "Umbrella",
+        "Train", "Bicycle", "Scooter", "Rocket", "Robot", "Superhero", "Pirate", "Detective",
+        "Doctor", "Chef", "Dancer", "Singer", "Wedding", "Baraat", "Fireworks", "Drum",
+        "Balloon", "Snowman", "Sunflower", "Volcano", "Dinosaur", "Treasure", "Anchor", "Sailboat"
     )
 }

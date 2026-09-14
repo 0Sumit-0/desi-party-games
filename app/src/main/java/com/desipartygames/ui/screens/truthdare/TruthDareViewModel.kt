@@ -3,6 +3,7 @@ package com.desipartygames.ui.screens.truthdare
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desipartygames.core.ActiveGroupManager
+import com.desipartygames.core.randomDifferentFrom
 import com.desipartygames.data.content.TruthDareBank
 import com.desipartygames.data.content.TruthDarePrompt
 import com.desipartygames.data.local.entity.CustomPromptEntity
@@ -25,8 +26,7 @@ enum class TruthDareState {
 
 data class TruthDareUiState(
     val gameState: TruthDareState = TruthDareState.SPIN_BOTTLE,
-    val selectedCategory: String = "FRIENDS", // "FAMILY", "FRIENDS", "SPICY"
-    val isSpicyAgeConfirmed: Boolean = false,
+    val selectedCategory: String = "FRIENDS", // "FAMILY" or "FRIENDS"
     val players: List<PlayerEntity> = emptyList(),
     val selectedPlayerIndex: Int = 0,
     val bottleRotationAngle: Float = 0f,
@@ -44,6 +44,7 @@ class TruthDareViewModel(private val repository: PartyGamesRepository) : ViewMod
 
     private val _uiState = MutableStateFlow(TruthDareUiState())
     val uiState: StateFlow<TruthDareUiState> = _uiState.asStateFlow()
+    private var lastPromptId: String? = null
 
     init {
         viewModelScope.launch {
@@ -70,16 +71,9 @@ class TruthDareViewModel(private val repository: PartyGamesRepository) : ViewMod
     }
 
     fun selectCategory(category: String) {
-        if (category == "SPICY" && !_uiState.value.isSpicyAgeConfirmed) {
-            // Need age confirmation modal
-            _uiState.value = _uiState.value.copy(selectedCategory = category)
-        } else {
+        if (category == "FAMILY" || category == "FRIENDS") {
             _uiState.value = _uiState.value.copy(selectedCategory = category)
         }
-    }
-
-    fun confirmAgeGate() {
-        _uiState.value = _uiState.value.copy(isSpicyAgeConfirmed = true, selectedCategory = "SPICY")
     }
 
     fun spinBottle() {
@@ -111,7 +105,8 @@ class TruthDareViewModel(private val repository: PartyGamesRepository) : ViewMod
             TruthDareBank.prompts.filter { it.type == type }
         }
 
-        val chosen = matchingPrompts.random()
+        val chosen = randomDifferentFrom(matchingPrompts, matchingPrompts.find { it.id == lastPromptId })
+        lastPromptId = chosen.id
 
         _uiState.value = _uiState.value.copy(
             currentPromptType = type,
@@ -149,7 +144,7 @@ class TruthDareViewModel(private val repository: PartyGamesRepository) : ViewMod
                     gameType = type,
                     category = category,
                     content = text.trim(),
-                    isSpicy = category == "SPICY"
+                    isSpicy = false
                 )
             )
         }

@@ -40,7 +40,6 @@ fun TruthOrDareScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    var showAgeGateModal by rememberSaveable { mutableStateOf(false) }
     var showTutorialDialog by rememberSaveable { mutableStateOf(false) }
     var showMinimumPlayersDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -69,13 +68,7 @@ fun TruthOrDareScreen(
                     BottleSpinView(
                         uiState = uiState,
                         language = language,
-                        onSelectCategory = { cat ->
-                            if (cat == "SPICY" && !uiState.isSpicyAgeConfirmed) {
-                                showAgeGateModal = true
-                            } else {
-                                viewModel.selectCategory(cat)
-                            }
-                        },
+                        onSelectCategory = { cat -> viewModel.selectCategory(cat) },
                         onSpinBottle = {
                             if (uiState.players.size < GameRules.minimumPlayers(GameRules.TRUTH_DARE)) {
                                 showMinimumPlayersDialog = true
@@ -118,57 +111,6 @@ fun TruthOrDareScreen(
                             viewModel.forfeitChallenge()
                         }
                     )
-                }
-            }
-
-            // Age-Gate Dialog for Spicy (18+)
-            if (showAgeGateModal) {
-                Dialog(onDismissRequest = { showAgeGateModal = false }) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(24.dp))
-                            .border(2.dp, RaniPink, RoundedCornerShape(24.dp)),
-                        colors = CardDefaults.cardColors(containerColor = SleekSurfaceCard)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(20.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(14.dp)
-                        ) {
-                            Text(text = "🌶️ 18+ Spicy Content Pack", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = RaniPink)
-                            Text(
-                                text = "This pack contains dating questions, spicy dares, and bold personal confessions. Are all players 18+ and consenting to play?",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = SleekTextPrimary,
-                                textAlign = TextAlign.Center
-                            )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                OutlinedButton(
-                                    onClick = { showAgeGateModal = false },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(12.dp),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, SleekSurfaceBorder)
-                                ) {
-                                    Text("Cancel", color = SleekTextSecondary)
-                                }
-                                Button(
-                                    onClick = {
-                                        showAgeGateModal = false
-                                        viewModel.confirmAgeGate()
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.buttonColors(containerColor = RaniPink, contentColor = Color.White),
-                                    shape = RoundedCornerShape(12.dp)
-                                ) {
-                                    Text("I Agree (18+)", fontWeight = FontWeight.Bold, color = Color.White)
-                                }
-                            }
-                        }
-                    }
                 }
             }
 
@@ -261,8 +203,7 @@ fun BottleSpinView(
             ) {
                 listOf(
                     Triple("FAMILY", "👨‍👩‍👧‍👦 Family", EmeraldGreen),
-                    Triple("FRIENDS", "🎉 Friends", SleekPurple),
-                    Triple("SPICY", "🌶️ Spicy 18+", RaniPink)
+                    Triple("FRIENDS", "🎉 Friends", SleekPurple)
                 ).forEach { (key, label, color) ->
                     val isSelected = uiState.selectedCategory == key
                     Button(
@@ -611,7 +552,7 @@ fun AddCustomPromptDialog(
 
                 // Category
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    listOf("FAMILY" to "Family", "FRIENDS" to "Friends", "SPICY" to "Spicy").forEach { (c, lbl) ->
+                    listOf("FAMILY" to "Family", "FRIENDS" to "Friends").forEach { (c, lbl) ->
                         val isSel = category == c
                         Surface(
                             shape = RoundedCornerShape(8.dp),

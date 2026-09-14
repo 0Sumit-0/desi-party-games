@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 data class HomeUiState(
     val language: AppLanguage = AppLanguage.HINGLISH,
     val selectedGroup: String = "Hostel Gang",
-    val availableGroups: List<String> = listOf("Hostel Gang", "Family Adda", "Chai Pe Charcha"),
+    val availableGroups: List<String> = listOf("Hostel Gang", "Family Adda"),
     val playersInGroup: List<PlayerEntity> = emptyList(),
     val totalMatchesPlayed: Int = 0
 )
@@ -27,19 +27,28 @@ class HomeViewModel(private val repository: PartyGamesRepository) : ViewModel() 
         repository.allPlayers,
         repository.gameHistory
     ) { lang, group, players, history ->
-        val groups = players.map { it.groupTag }.distinct().ifEmpty { listOf("Hostel Gang", "Family Adda") }
-        val currentGroupPlayers = players.filter { it.groupTag == group }.ifEmpty {
+        val groups = players
+            .map { it.groupTag }
+            .filterNot { it == "Chai Pe Charcha" || it == "Office Squad" }
+            .distinct()
+            .ifEmpty { listOf("Hostel Gang", "Family Adda") }
+        val effectiveGroup = if (group == "Chai Pe Charcha" || group == "Office Squad") {
+            "Hostel Gang"
+        } else {
+            group
+        }
+        val currentGroupPlayers = players.filter { it.groupTag == effectiveGroup }.ifEmpty {
             listOf(
-                PlayerEntity(name = "Aarav", groupTag = group, avatarEmoji = "🔥"),
-                PlayerEntity(name = "Pooja", groupTag = group, avatarEmoji = "💃"),
-                PlayerEntity(name = "Kabir", groupTag = group, avatarEmoji = "😎"),
-                PlayerEntity(name = "Ananya", groupTag = group, avatarEmoji = "✨")
+                PlayerEntity(name = "Aarav", groupTag = effectiveGroup, avatarEmoji = "🔥"),
+                PlayerEntity(name = "Pooja", groupTag = effectiveGroup, avatarEmoji = "💃"),
+                PlayerEntity(name = "Kabir", groupTag = effectiveGroup, avatarEmoji = "😎"),
+                PlayerEntity(name = "Ananya", groupTag = effectiveGroup, avatarEmoji = "✨")
             )
         }
 
         HomeUiState(
             language = lang,
-            selectedGroup = group,
+            selectedGroup = effectiveGroup,
             availableGroups = groups,
             playersInGroup = currentGroupPlayers,
             totalMatchesPlayed = history.size

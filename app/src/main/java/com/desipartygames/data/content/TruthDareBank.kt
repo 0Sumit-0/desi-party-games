@@ -166,5 +166,5 @@ object TruthDareBank {
             "अपने दाईं ओर वाले खिलाड़ी को अपनी पिछली चैट पर कोई भी एक इमोजी भेजने दें।",
             "Right side wale player ko aapki last personal chat pe koi bhi emoji send karne do."
         )
-    )
+    ).filterNot { it.category == "SPICY" }
 }

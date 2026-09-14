@@ -1,6 +1,7 @@
 package com.desipartygames.ui.screens.antakshari
 
 import androidx.lifecycle.ViewModel
+import com.desipartygames.core.randomDifferentFrom
 import com.desipartygames.data.content.AntakshariBank
 import com.desipartygames.data.content.AntakshariLetter
 import com.desipartygames.data.repository.PartyGamesRepository
@@ -33,13 +34,15 @@ class AntakshariViewModel(private val repository: PartyGamesRepository) : ViewMo
 
     private val _uiState = MutableStateFlow(AntakshariUiState())
     val uiState: StateFlow<AntakshariUiState> = _uiState.asStateFlow()
+    private var lastLetter: AntakshariLetter? = null
 
     init {
         generateRandomLetter()
     }
 
     fun generateRandomLetter() {
-        val letter = AntakshariBank.letters.random()
+        val letter = randomDifferentFrom(AntakshariBank.letters, lastLetter)
+        lastLetter = letter
         _uiState.value = _uiState.value.copy(
             currentLetter = letter,
             isHintRevealed = false
@@ -49,7 +52,7 @@ class AntakshariViewModel(private val repository: PartyGamesRepository) : ViewMo
     fun selectLetterByChar(char: String) {
         val matched = AntakshariBank.letters.find {
             it.devanagari.contains(char, ignoreCase = true) || it.roman.equals(char, ignoreCase = true)
-        } ?: AntakshariBank.letters.random()
+        } ?: randomDifferentFrom(AntakshariBank.letters, lastLetter)
 
         _uiState.value = _uiState.value.copy(
             currentLetter = matched,
@@ -79,7 +82,8 @@ class AntakshariViewModel(private val repository: PartyGamesRepository) : ViewMo
         }
 
         val nextTeamIdx = (currentIdx + 1) % updatedTeams.size
-        val nextLetter = AntakshariBank.letters.random()
+        val nextLetter = randomDifferentFrom(AntakshariBank.letters, lastLetter)
+        lastLetter = nextLetter
 
         _uiState.value = _uiState.value.copy(
             teams = updatedTeams,
@@ -93,7 +97,7 @@ class AntakshariViewModel(private val repository: PartyGamesRepository) : ViewMo
     fun addTeam(name: String) {
         if (name.isBlank() || _uiState.value.teams.size >= 4) return
         val updated = _uiState.value.teams.toMutableList().apply {
-            add(AntakshariTeam(name.trim(), 0, listOf("🎸", "🎺", "🥁", "✨").random()))
+            add(AntakshariTeam(name.trim(), 0, listOf("🎸", "🎺", "🥁", "✨").shuffled().first()))
         }
         _uiState.value = _uiState.value.copy(teams = updated)
     }

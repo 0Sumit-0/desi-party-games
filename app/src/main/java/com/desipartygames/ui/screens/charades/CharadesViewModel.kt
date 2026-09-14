@@ -1,6 +1,7 @@
 package com.desipartygames.ui.screens.charades
 
 import androidx.lifecycle.ViewModel
+import com.desipartygames.core.randomDifferentFrom
 import com.desipartygames.data.content.CharadesBank
 import com.desipartygames.data.content.CharadesCategory
 import com.desipartygames.data.content.CharadesItem
@@ -42,6 +43,7 @@ class CharadesViewModel(private val repository: PartyGamesRepository) : ViewMode
 
     private val _uiState = MutableStateFlow(CharadesUiState())
     val uiState: StateFlow<CharadesUiState> = _uiState.asStateFlow()
+    private var lastPrompt: CharadesItem? = null
 
     fun selectCategory(category: CharadesCategory) {
         _uiState.value = _uiState.value.copy(selectedCategory = category)
@@ -60,7 +62,8 @@ class CharadesViewModel(private val repository: PartyGamesRepository) : ViewMode
 
     fun startTurn() {
         val category = _uiState.value.selectedCategory
-        val item = category.items.random()
+        val item = randomDifferentFrom(category.items, lastPrompt)
+        lastPrompt = item
         _uiState.value = _uiState.value.copy(
             currentPrompt = item,
             gameState = CharadesGameState.PASS_TO_ACTOR

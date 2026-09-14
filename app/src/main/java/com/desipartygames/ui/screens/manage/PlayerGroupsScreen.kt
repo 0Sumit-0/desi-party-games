@@ -44,8 +44,13 @@ fun PlayerGroupsScreen(
     val coroutineScope = rememberCoroutineScope()
     val allPlayers by repository.allPlayers.collectAsState(initial = emptyList())
 
-    val availableGroups = listOf("Hostel Gang", "Family Adda", "Chai Pe Charcha", "Office Squad")
+    val availableGroups = listOf("Hostel Gang", "Family Adda")
     val selectedGroup by ActiveGroupManager.currentGroup.collectAsState()
+    LaunchedEffect(selectedGroup) {
+        if (selectedGroup == "Chai Pe Charcha" || selectedGroup == "Office Squad") {
+            ActiveGroupManager.currentGroup.value = "Hostel Gang"
+        }
+    }
     var newPlayerName by remember { mutableStateOf("") }
     var selectedEmoji by remember { mutableStateOf("🔥") }
 
