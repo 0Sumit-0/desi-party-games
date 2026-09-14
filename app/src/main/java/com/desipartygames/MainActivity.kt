@@ -34,6 +34,7 @@ import com.desipartygames.ui.screens.rajamantri.RajaMantriScreen
 import com.desipartygames.ui.screens.rajamantri.RajaMantriViewModel
 import com.desipartygames.ui.screens.truthdare.TruthDareViewModel
 import com.desipartygames.ui.screens.truthdare.TruthOrDareScreen
+import com.desipartygames.ui.components.FirstLaunchOnboardingDialog
 import com.desipartygames.ui.theme.DesiPartyTheme
 
 private class AppViewModelFactory(
@@ -55,6 +56,11 @@ private class AppViewModelFactory(
 
 class MainActivity : ComponentActivity() {
 
+    private companion object {
+        const val ONBOARDING_PREFERENCES = "onboarding_preferences"
+        const val HAS_SEEN_ONBOARDING = "has_seen_onboarding"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -66,6 +72,12 @@ class MainActivity : ComponentActivity() {
             DesiPartyTheme {
                 val navController = rememberNavController()
                 var currentLanguage by rememberSaveable { mutableStateOf(AppLanguage.HINGLISH) }
+                val onboardingPreferences = remember {
+                    getSharedPreferences(ONBOARDING_PREFERENCES, MODE_PRIVATE)
+                }
+                var showOnboarding by rememberSaveable {
+                    mutableStateOf(!onboardingPreferences.getBoolean(HAS_SEEN_ONBOARDING, false))
+                }
                 val viewModelFactory = remember { AppViewModelFactory(repository) }
 
                 val homeViewModel: HomeViewModel = viewModel(factory = viewModelFactory)
@@ -190,6 +202,17 @@ class MainActivity : ComponentActivity() {
                             onNavigateBack = { navController.popBackStack() }
                         )
                     }
+                }
+
+                if (showOnboarding) {
+                    FirstLaunchOnboardingDialog(
+                        onFinished = {
+                            onboardingPreferences.edit()
+                                .putBoolean(HAS_SEEN_ONBOARDING, true)
+                                .apply()
+                            showOnboarding = false
+                        }
+                    )
                 }
             }
         }
