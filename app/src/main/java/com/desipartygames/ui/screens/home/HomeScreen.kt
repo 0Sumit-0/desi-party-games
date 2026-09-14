@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.desipartygames.core.AppLanguage
 import com.desipartygames.core.AppStrings
+import com.desipartygames.core.GameRules
 import com.desipartygames.core.SoundEffects
 import com.desipartygames.ui.components.GameTutorialDialog
 import com.desipartygames.ui.components.PartyTopBar
@@ -54,6 +55,7 @@ fun HomeScreen(
     val language = uiState.language
     var showTutorialDialog by rememberSaveable { mutableStateOf(false) }
     var initialTutorialGameId by rememberSaveable { mutableStateOf("game_imposter") }
+    var blockedGameRoute by rememberSaveable { mutableStateOf<String?>(null) }
 
     val gamesList = listOf(
         GameCardItem(
@@ -130,6 +132,16 @@ fun HomeScreen(
             route = "game_pictionary"
         )
     )
+    val featuredGame = remember { gamesList.random() }
+
+    fun openGame(route: String) {
+        if (uiState.playersInGroup.size < GameRules.minimumPlayers(route)) {
+            blockedGameRoute = route
+        } else {
+            SoundEffects.playClick(context)
+            onNavigateToGame(route)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -183,7 +195,7 @@ fun HomeScreen(
                         ) {
                             // Background watermark emoji
                             Text(
-                                text = "👑",
+                                text = featuredGame.emoji,
                                 fontSize = 90.sp,
                                 modifier = Modifier
                                     .align(Alignment.BottomEnd)
@@ -210,14 +222,14 @@ fun HomeScreen(
                                 }
 
                                 Text(
-                                    text = "Raja Mantri Chor Sipahi",
+                                    text = AppStrings.get(featuredGame.titleKey, language),
                                     style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
                                 )
 
                                 Text(
-                                    text = "Pass the phone to secretly assign royal roles. Who is the Chor?",
+                                    text = AppStrings.get(featuredGame.descKey, language),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = Color.White.copy(alpha = 0.95f),
                                     modifier = Modifier.fillMaxWidth(0.85f)
@@ -231,8 +243,7 @@ fun HomeScreen(
                                 ) {
                                     Button(
                                         onClick = {
-                                            SoundEffects.playClick(context)
-                                            onNavigateToGame("game_raja_mantri")
+                                            openGame(featuredGame.route)
                                         },
                                         shape = RoundedCornerShape(100.dp),
                                         colors = ButtonDefaults.buttonColors(
@@ -243,7 +254,7 @@ fun HomeScreen(
                                         modifier = Modifier.testTag("hero_start_game_btn")
                                     ) {
                                         Text(
-                                            text = "Play Now 👑",
+                                            text = "Play Now ${featuredGame.emoji}",
                                             fontWeight = FontWeight.Bold,
                                             style = MaterialTheme.typography.labelLarge,
                                             color = SleekPurple
@@ -253,7 +264,7 @@ fun HomeScreen(
                                     OutlinedButton(
                                         onClick = {
                                             SoundEffects.playClick(context)
-                                            initialTutorialGameId = "game_raja_mantri"
+                                            initialTutorialGameId = featuredGame.route
                                             showTutorialDialog = true
                                         },
                                         shape = RoundedCornerShape(100.dp),
@@ -463,8 +474,7 @@ fun HomeScreen(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(20.dp))
                             .clickable {
-                                SoundEffects.playClick(context)
-                                onNavigateToGame(game.route)
+                                openGame(game.route)
                             }
                             .testTag("game_card_${game.id}"),
                         colors = CardDefaults.cardColors(containerColor = SleekSurfaceCard),
@@ -566,6 +576,19 @@ fun HomeScreen(
                     initialGameId = initialTutorialGameId,
                     language = language,
                     onDismiss = { showTutorialDialog = false }
+                )
+            }
+
+            blockedGameRoute?.let { route ->
+                AlertDialog(
+                    onDismissRequest = { blockedGameRoute = null },
+                    title = { Text("Not enough players") },
+                    text = { Text(GameRules.minimumPlayersMessage(route)) },
+                    confirmButton = {
+                        TextButton(onClick = { blockedGameRoute = null }) {
+                            Text("OK")
+                        }
+                    }
                 )
             }
         }

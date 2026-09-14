@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.desipartygames.core.AppLanguage
 import com.desipartygames.core.AppStrings
+import com.desipartygames.core.GameRules
 import com.desipartygames.core.SoundEffects
 import com.desipartygames.ui.components.*
 import com.desipartygames.ui.theme.*
@@ -39,6 +40,7 @@ fun RajaMantriScreen(
     val context = LocalContext.current
     var newPlayerName by rememberSaveable { mutableStateOf("") }
     var showTutorialDialog by rememberSaveable { mutableStateOf(false) }
+    var showMinimumPlayersDialog by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -73,8 +75,12 @@ fun RajaMantriScreen(
                         },
                         onRemovePlayer = { viewModel.removePlayer(it) },
                         onStartGame = {
-                            SoundEffects.playChitShuffle(context)
-                            viewModel.startChitShuffling()
+                            if (uiState.players.size < GameRules.minimumPlayers(GameRules.RAJA_MANTRI)) {
+                                showMinimumPlayersDialog = true
+                            } else {
+                                SoundEffects.playChitShuffle(context)
+                                viewModel.startChitShuffling()
+                            }
                         }
                     )
                 }
@@ -142,6 +148,17 @@ fun RajaMantriScreen(
                     initialGameId = "game_raja_mantri",
                     language = language,
                     onDismiss = { showTutorialDialog = false }
+                )
+            }
+
+            if (showMinimumPlayersDialog) {
+                AlertDialog(
+                    onDismissRequest = { showMinimumPlayersDialog = false },
+                    title = { Text("Not enough players") },
+                    text = { Text(GameRules.minimumPlayersMessage(GameRules.RAJA_MANTRI)) },
+                    confirmButton = {
+                        TextButton(onClick = { showMinimumPlayersDialog = false }) { Text("OK") }
+                    }
                 )
             }
 
@@ -301,34 +318,31 @@ fun RajaSetupView(
 
         item {
             Spacer(modifier = Modifier.height(8.dp))
-            if (uiState.players.size>=4){
-                Button(
-                    onClick = onStartGame,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .testTag("shuffle_chits_btn"),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = SleekPurple,
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(16.dp)
+            Button(
+                onClick = onStartGame,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .testTag("shuffle_chits_btn"),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = SleekPurple,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(text = "🎲", fontSize = 20.sp)
-                        Text(
-                            text = "Shuffle Chits & Pass Phone",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
+                    Text(text = "🎲", fontSize = 20.sp)
+                    Text(
+                        text = "Shuffle Chits & Pass Phone",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
                 }
             }
-
         }
     }
 }

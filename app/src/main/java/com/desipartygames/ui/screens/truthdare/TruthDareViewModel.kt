@@ -2,6 +2,7 @@ package com.desipartygames.ui.screens.truthdare
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.desipartygames.core.ActiveGroupManager
 import com.desipartygames.data.content.TruthDareBank
 import com.desipartygames.data.content.TruthDarePrompt
 import com.desipartygames.data.local.entity.CustomPromptEntity
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.random.Random
+import kotlinx.coroutines.flow.combine
 
 enum class TruthDareState {
     SPIN_BOTTLE,
@@ -45,9 +47,11 @@ class TruthDareViewModel(private val repository: PartyGamesRepository) : ViewMod
 
     init {
         viewModelScope.launch {
-            repository.allPlayers.collect { all ->
-                if (all.isNotEmpty() && _uiState.value.players.isEmpty()) {
-                    val defaultList = all.take(5).ifEmpty {
+            combine(repository.allPlayers, ActiveGroupManager.currentGroup) { all, group ->
+                all.filter { it.groupTag == group }
+            }.collect { groupPlayers ->
+                if (groupPlayers.isNotEmpty() && _uiState.value.players.isEmpty()) {
+                    val defaultList = groupPlayers.take(15).ifEmpty {
                         listOf(
                             PlayerEntity(name = "Aarav", avatarEmoji = "🔥"),
                             PlayerEntity(name = "Pooja", avatarEmoji = "🌸"),

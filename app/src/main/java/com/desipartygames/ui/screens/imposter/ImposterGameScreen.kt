@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.desipartygames.core.AppLanguage
 import com.desipartygames.core.AppStrings
+import com.desipartygames.core.GameRules
 import com.desipartygames.core.SoundEffects
 import com.desipartygames.data.content.ImposterWordsBank
 import com.desipartygames.ui.components.*
@@ -40,6 +41,7 @@ fun ImposterGameScreen(
     val context = LocalContext.current
     var newPlayerName by rememberSaveable { mutableStateOf("") }
     var showTutorialDialog by rememberSaveable { mutableStateOf(false) }
+    var showMinimumPlayersDialog by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -76,8 +78,12 @@ fun ImposterGameScreen(
                         onSelectCategory = { viewModel.selectCategory(it) },
                         onSetImposterCount = { viewModel.setImposterCount(it) },
                         onStartGame = {
-                            SoundEffects.playClick(context)
-                            viewModel.startNewGame()
+                            if (uiState.players.size < GameRules.minimumPlayers(GameRules.IMPOSTER)) {
+                                showMinimumPlayersDialog = true
+                            } else {
+                                SoundEffects.playClick(context)
+                                viewModel.startNewGame()
+                            }
                         }
                     )
                 }
@@ -139,6 +145,17 @@ fun ImposterGameScreen(
                     initialGameId = "game_imposter",
                     language = language,
                     onDismiss = { showTutorialDialog = false }
+                )
+            }
+
+            if (showMinimumPlayersDialog) {
+                AlertDialog(
+                    onDismissRequest = { showMinimumPlayersDialog = false },
+                    title = { Text("Not enough players") },
+                    text = { Text(GameRules.minimumPlayersMessage(GameRules.IMPOSTER)) },
+                    confirmButton = {
+                        TextButton(onClick = { showMinimumPlayersDialog = false }) { Text("OK") }
+                    }
                 )
             }
 
@@ -360,8 +377,7 @@ fun ImposterSetupView(
 
         item {
             Spacer(modifier = Modifier.height(12.dp))
-            if (uiState.players.size>=3){
-                Button(
+            Button(
                     onClick = onStartGame,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -386,7 +402,6 @@ fun ImposterSetupView(
                         )
                     }
                 }
-            }
 
             Spacer(modifier = Modifier.height(24.dp))
         }

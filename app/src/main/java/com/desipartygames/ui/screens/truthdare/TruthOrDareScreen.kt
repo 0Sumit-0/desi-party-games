@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.desipartygames.core.AppLanguage
 import com.desipartygames.core.AppStrings
+import com.desipartygames.core.GameRules
 import com.desipartygames.core.SoundEffects
 import com.desipartygames.ui.components.*
 import com.desipartygames.ui.theme.*
@@ -41,6 +42,7 @@ fun TruthOrDareScreen(
     val context = LocalContext.current
     var showAgeGateModal by rememberSaveable { mutableStateOf(false) }
     var showTutorialDialog by rememberSaveable { mutableStateOf(false) }
+    var showMinimumPlayersDialog by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -75,8 +77,12 @@ fun TruthOrDareScreen(
                             }
                         },
                         onSpinBottle = {
-                            SoundEffects.playFanfare(context)
-                            viewModel.spinBottle()
+                            if (uiState.players.size < GameRules.minimumPlayers(GameRules.TRUTH_DARE)) {
+                                showMinimumPlayersDialog = true
+                            } else {
+                                SoundEffects.playFanfare(context)
+                                viewModel.spinBottle()
+                            }
                         },
                         onSpinAnimationFinished = { viewModel.onBottleSpinFinished() },
                         onOpenCustomPromptDialog = { viewModel.setAddPromptDialogOpen(true) }
@@ -183,6 +189,17 @@ fun TruthOrDareScreen(
                     initialGameId = "game_truth_dare",
                     language = language,
                     onDismiss = { showTutorialDialog = false }
+                )
+            }
+
+            if (showMinimumPlayersDialog) {
+                AlertDialog(
+                    onDismissRequest = { showMinimumPlayersDialog = false },
+                    title = { Text("Not enough players") },
+                    text = { Text(GameRules.minimumPlayersMessage(GameRules.TRUTH_DARE)) },
+                    confirmButton = {
+                        TextButton(onClick = { showMinimumPlayersDialog = false }) { Text("OK") }
+                    }
                 )
             }
 
